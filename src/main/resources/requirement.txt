@@ -1,0 +1,296 @@
+******************* TopNews *******************
+topnews.uz partalida Foydalanuvchilar portalga kirib oxirgi yangiliklarni o'qish,
+yoki qandaydir yangilikni qidirish, yangiliklarga like va izohlar qoldirish
+kabi amallarni bajara oladi.
+
+Bu partal kun.uz, daryo.uz yoki qalampir.uz kabi saytlarga o'xshagan informatsion partal hisoblanadi.
+Bundan tashqari tun.uz da kommentariya yozish, kile bosish va maqolalarni saqlab qo'yish imkoni bo'ladi.
+
+Shuningdek partalda valuta kurslarini ham ko'rsatib qo'yish lozim.
+    USD 12,940 / EUR 13,336 / RUB 126
+
+Telegram bot ->
+    Comment yozilganda Moderatorlar gruppasiga yo'naltirilsin.
+
+tun.uz partalida quyidagi talablar bajarilishi kerak:
+
+    1. Foydalanuvchilarda quyida funksionallar bo'lishi kerak
+        a. Tizimdan ro'yhatdan o'tish. Bunda Email orqali bo'lsin.
+        b. Ro'yhatdan o'tgan foydalanuvchilar tizimga login bo'lib kirish.
+        c. Maqolalarga like bosish yoki izohlar qoldirish imkoni bo'lsin.
+        d. Ma'lum bir yangiliklarni saqlab qo'yish imkoni bo'lsin.
+            Saqlangan maqolalrni Profile page-dan ko'ra bilish kerak.
+            Saqlangan maqolalardan maqolani o'chirish imkoni ham bo'lsin.
+        e. Profile o'zining  Profile saxifaqisa o'tib
+            Isim, Familiya, Rasm,  Email va parol kabi ma'lumotlarini  o'zgartirish imkoni bo'lsin.
+
+    2. Admin-lar tizimga kirib tizimni boshqara olishlari kerak.
+       Ularda quyidagi imkoniyatlar bo'lsin.
+        a. Region-larni boshqarish
+        a. Category-larni boshqarish
+        a. Types-larni boshqarish
+        a. Tizimda ishlaydigan profillarni (ishchilarni) yaratish va boshqarish imkoni bo'lsin.
+        a. Tizimda qoldirilgan kommentlarni ko'rish va ularni taxrirlash. O'chirish ham.
+
+    3. Moderator (yozuvchilar/jurnalist)
+       Moderatorlar maqola yozadigan yozuvchi yoki jurnalist dir.
+       Ular tizimga login bo'lib kirib Dashboard-ga o'tib quyidagi funksionallarni bajarishlari mumkun.
+       a. Maqola yozish.
+       b. O'z lari yozgan maqolani ko'rish va taxrirlash imkoni mavjut
+
+    4. Publisher (tahrirchi/ katta moderator)
+       Publisher-lar yozilgan maqolalarni ko'rib o'qib ularni chop etuvchi ischilar dir.
+       Ular tizimga login bo'lib kirib Dashboard-ga o'tib quyidagi funksionallarni bajarishlari mumkun.
+       a. Yozilgan barcha maqolalarni ko'rishlari va shop etish imkoni bo'lsin.
+       b. Chop etilgan yangiliklarni bloklash imkoni ham bo'lsin.
+
+       Publisher lar o'zlari maqola yoza olmaydi. Ular faqat yozilgan maqolani ko'rib chop etishlari mumkun xalos yoki
+       chop etilgan maqolani blocklashlari mumkun.
+
+******************* Entity *******************
+1. Profile
+    id,name,surname,username(email/phone),password,status,visible,created_date,photo_id.
+    (Bitta profile-da bir-nechta role-lar bo'lishi mumkun.)
+2. ProfileRole
+    id,profileId,role
+3. Region
+    id,order_number,nameUz, nameRu, nameEn, key, visible,created_date
+4. Category(O'zbekiston, Jahon, Iksodiyot, Sport, Audio, Video, Jamiyat)
+    id,order_number,nameUz, nameRu, nameEn, key, visible,created_date
+5. Section(Bo'lim)
+    id,order_number,nameUz, nameRu, nameEn, key, visible,created_date, image_id (optional)
+     (Asosiy,Muharrir tanlovi,Dolzarb, Maqola, Foto yangilik,Interview,Biznes,Surushturuv,Video Yangilik, E'lonlar)
+6. Attach
+    id (uuid), original_name, path, size, extension, created_date
+7. Article
+    id(uuid),title,description,content,shared_count,image_id,
+    region_id,moderator_id,publisher_id,status(Published,NotPublished),
+    readTime (maqolani nechi daqiqa o'qilishi)
+    created_date,published_date,visible,view_count
+    (Bitta article bitta Region-ga tegishli mumkun (ixtiyoriy))
+    (Bitta article bir-nechta Category-ga tegishli mumkun)
+    (Bitta article bir-nechta Section-da bo'lishi mumkun. Masalan Asosiy,Muharrir h.k.)
+8. ArticleCategory
+    id, articleId, categoryId
+9. ArticleSection
+    id, articleId, sectionId
+10. ArticleLike
+    id,profile_id,article_id,created_date,emotion(LIKE,DISLIKE.,
+11. Comment
+    id,created_date,update_date,profile_id,content,article_id,reply_id,visible.
+12. CommentLike
+    id,profile_id,comment_id,created_date,emotion(LIKE,DISLIKE).
+13. SavedArticle
+    id, profile_id, article_id,created_date
+14. EmailHistory
+    id, message, email, created_data
+
+* LanguageEnum (en,uz,ru)
+* ProfileRoleEnum (ROLE_USER,ROLE_ADMIN,ROLE_MODERATOR,ROLE_PUBLISH)
+* ProfileStatusEnum (ACTIVE,NOT_ACTIVE,BLOCKED)
+
+******************* API list *******************
+1.  Authorization
+    1. Registration (only USER)
+        Request: (name,surname, username(email/phone), password) + validation. password with MD5/ByCript encode.
+        Response: Message
+    2. Login
+        Request:  email/phone,password
+        Response: (name,surname, username(email/phone),roleList[], photo{id,url}, )
+    3. Verification
+        Request: (phone -> code) or (mail -> link)
+        Response: message (should by limit for verification time)
+    4. Resent
+        Request: (phone ->  code) or (mail -> link)
+        Response: (should by limit for verification time)
+2. Profile
+    1. Create profile (ADMIN) (can create ROLE_MODERATOR, ROLE_PUBLISHER))
+         Request: name,surname,username(email/phone),password,status, roleList[]
+         Response: ProfileInfoDTO
+    2. Get By Id. (id bo'yicha bittasini return qiladi) (ADMIN)
+    3. Update Profile (ADMIN)
+    4. Update Profile Detail (ANY) (Profile updates own details)
+    5. Profile List (ADMIN) (Pagination)
+    6. Delete Profile By Id (ADMIN)
+    7. Update Photo (ANY) (Murojat qilgan odamni rasmini update qilish)   (remove old image)
+           photo_id
+    8. Update Password (ANY) (Murojat qilgan odamni password-ni update qilish)
+    9. Filter (query (name/surname/username),role,created_date_from,created_date_to) (ADMIN)
+        Response: ProfileInfoDTO
+
+     ProfileInfoDTO{id,name,surname,username,roleList['',''],createdDate,status,photo_id}
+3. Region
+    1. Create  (ADMIN)
+        (order_number,nameUz, nameRu, nameEn, key)
+    2. Update by id (ADMIN)
+        (order_number,nameUz, nameRu, nameEn, key)
+    3. Delete by id (ADMIN)
+    4. Get List (ADMIN) created_date order by desc
+        (id,key,nameUz, nameRu, nameEn, key, visible,created_date)
+    5. Get By Lang (Language  keladishu language dagi name larini berib yuboramiz)
+        (id,key,name) (name ga tegishli name_.. dagi qiymat qo'yiladi.) (visible true)
+        [
+         {id,key,name},
+         {id,key,name},
+         {id,key,name}
+         ]
+4. Category
+    1. Create  (ADMIN)
+            (order_number,nameUz, nameRu, nameEn, key)
+    2. Update by id (ADMIN)
+        (order_number,nameUz, nameRu, nameEn, key)
+    3. Delete by id (ADMIN)
+    4. Get List (ADMIN) - order by order_number
+        (id,order_number,nameUz, nameRu, nameEn, key,visible,created_date)
+    5. Get By Lang (Language keladi shu language dagi name larini berib yuboramiz) (PUBLIC)
+        (id,order_number,name, key) (name ga tegishli name_... dagi qiymat qo'yiladi.)
+        [
+         {id,key,name},
+         {id,key,name},
+         {id,key,name}
+        ]
+5. Section
+    1. Create  (ADMIN)
+        Request: (orderNumber,nameUz, nameRu, nameEn, key)
+    2. Update by id (ADMIN)
+        (order_number,nameUz, nameRu, nameEn, key)
+    3. Delete by id (ADMIN)
+    4. Get List (ADMIN) (Pagination)
+        (id,key,nameUz, nameRu, nameEn, key, visible, created_date)
+    5. Get By Lang (Language keladi shu language dagi name larini berib yuboramiz)
+        (id,key,name) (name ga tegishli name_.. dagi qiymat qo'yiladi.)
+6. Attach
+    1. Upload  (ANY)
+    2. Open (by id)
+    3. Download (by id  with origin name)
+    4. Pagination (ADMIN)
+    5. Delete by id (delete from system and table) (ADMIN)
+7. Article
+    1. CREATE (Moderator) status(NotPublished)
+        Request: (title,description,content,imageId, regionId, categoryList[{id},{id}], sectionList[{id},{id}] )
+        Response: ArticleInfoDTO
+    2. Update (Moderator (status to not publish)) (remove old image)
+        Request: (title,description,content,imageId, regionId, categoryList[], sectionList[])
+        Response: ArticleInfoDTO
+    3. Delete Article (MODERATOR)
+        Request: id
+        Response: "Message"
+    4. Change status by id (PUBLISHER) (publish,not_publish)
+        Request: id, (status)
+        Response: "Message"
+    5. Get Last N Article By sectionId  ordered_by_created_date desc
+        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
+         (Pagination bilan ishlaydigan qilish kerak)
+        ArticleShortInfo
+    6. Get Last 12 published Article except given id list ordered_by_created_date
+        ([1,2,3,])
+        (Berilgan Article-lardan tashqarida oxirgi qo'shilgan 12-ta article-ning return qiladi.
+         (Article-larning id-lari kelasi, shu berilgan article-larndan tashqari bo'lgan article-larni 12-tasini return qilamiz.)
+         (Pagination bilan ishlaydigan qilish kerak)
+         ArticleShortInfo
+    7. Get Last N Article by categoryId. (Berilgan categoryId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
+        (Pagination bilan ishlaydigan qilish kerak)
+        ArticleShortInfo
+    8. Get Last N Article by regionId. (Berilgan regionId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
+        (Pagination bilan ishlaydigan qilish kerak)
+        ArticleFullInfo
+    9. Get Article By Id And Lang
+        ArticleFullInfo
+    10. Get Last N Article By TagName (Berilgan tag nomi bo'yicha oxirgi N-ta yangilikni return qiladi)
+        (Pagination bilan ishlaydigan qilish kerak)
+        ArticleShortInfo
+    11. Get Last 4 Article By sectionId, except given article id.
+        (Berilgan SectionId bo'yicha oxirgi 4-ta maqolani return qiladi. Berilgan maqolaning id-sidan tash)
+        ArticleShortInfo
+    12. Get 4 most read articles, except given article id . (Ko'p oqilgan oxirgi 4-ta yangilikni return qiladi, berilgan maqoldagan tashqari)
+        ArticleShortInfo
+    13. Increase Article View Count by Article Id
+          (article_id)
+    14. Increase Share View Count by Article Id
+             (article_id)
+    15. Filter Article (title,region_id,category_id,published_date_from,published_date_to) with Pagination (PUBLISHER)
+        (Bu API oddiy foydalanuvchilar uchun search/qidirish uchun ishlatiladi. Berilgan parameter-lari orqali search qilish mumkun. Bu api faqat PUBLISH bo'lgan maqolalarni retunr qiladi xalos.)
+        ArticleShortInfo
+    16. Filter Article for Moderators
+       (title,region_id,category_id,crated_date_from,created_date_to
+        published_date_from,published_date_to,status) with Pagination (MODERATOR)
+       (Bu API faqat moderator uchun ishlaydi. Bu API faqat moderatorning maqolalarini return qiladi. Sear qilsa ham o'zining maqolalari orasidan search qiladi. Maqolaning statusi hohlagan bo'lishi mumkun.)
+       ArticleShortInfo
+    17. Filter Article for Moderators
+         (title,region_id,category_id,crated_date_from,created_date_to
+          published_date_from,published_date_to,moderator_id,publisher_id,status) with Pagination (PUBLISHER)
+          (Bu API larcha Publisher-lar tamonidan ishlatiladi. Maqolaning statu-si har qadnay bo'lishi mumkun.)
+          ArticleShortInfo
+
+    ArticleShortInfo
+         id(uuid),title,description,image(id,url),published_date
+    ArticleFullInfo
+    id(uuid),title,description,content,shared_count,
+        region(key,name),categoryList[{key,name},{}], sectionList[{id,name},{id,name}] published_date,view_count,like_count,
+        tagList[name,name]
+
+7. ArticleLike
+    1. Like (ANY)
+        (article_id)
+    2. Dislike (ANY
+        (article_id)
+    3. Remove (ANY
+        (article_id)
+
+8. Comment
+    1. CREATE (ANY)
+        (content,article_id,reply_id)
+    2. UPDATE (ANY and owner)
+         (content,article_id)
+    3. DELETE (ADMIN,ANY(only owner))
+    4. Get Article Comment List By Article Id
+        id,created_date,update_date,profile(id,name,surname)
+    5. Comment List (pagination) (ADMIN)
+        (id,created_date,update_date,profile(id,name,surname),content,article(id,title),reply_id,)
+    6. Comment Filter(id,created_date_from,created_date_to,profile_id,article_id) with Pagination (ADMIN)
+        id,created_date,update_date,profile_id,content,article_id,reply_id,visible, like_count, dislike_count
+    7. Get Replied Comment List by commentId
+        id,created_date,update_date,profile(id,name,surname)
+    8. Comment List by ArticleId. Berilgan Aticle-ga yozilgan comment-larni return qiladi.
+          [
+            {id,created_date,update_date,profile(id,name,image(id,url)),content,article_id, likeCount, DislikeCount}
+          ]
+9. CommentLike
+    1. Like (ANY)
+        (comment_id)
+    2. Dislike (ANY
+    3. Remove (ANY
+
+10. SavedArticle
+    1. Create (ANY)
+        article_id
+    2. Delete (ANY)
+        article_id
+    3. Get Profile Saved Article List (ANY)
+        (id,article(id,title,description,image(id,url)), saved_date)
+
+12. SmsHistory
+    1. Create Sms History when sms is send using application. (No need create api)
+    2. Get sms history by phone
+         (id, phone,message,status,type(if necessary),created_date)
+    3. Get sms history be given date
+         (id, phone,message,status,type(if necessary),created_date)
+    4.Pagination (ADMIN)
+         (id, phone,message,status,type(if necessary),created_date)
+    (!While sending should some restrictions:
+         For 1 phone 4 sms allowed during 1 minute.)
+13. EmailHistory
+    id, message, email, created_data
+    1. Create EmailHistory when email is send using application. (No need create api)
+    2. Get EmailHistory by email
+            (id, email,message,created_date)
+    3. Get EmailHistory  by given date
+            (id, email,message,created_date)
+    4. Pagination (ADMIN)
+            (id, email,message,created_date)
+
+       (!Should be limit for email sending. For 1 email 4 sms allowed during 1 minut. )
+14. Tag (bitta article-da bir nechta tag bo'lishi mumkun)
+	 1. Create (ANY)
+     2. List (ADMIN)
+            [{id,name}]

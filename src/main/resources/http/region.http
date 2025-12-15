@@ -1,0 +1,38 @@
+### Create region
+POST localhost:8080/api/v1/region
+Content-Type: application/json
+
+{
+  "orderNumber": 4,
+  "nameUz": "Toshkent 4",
+  "nameRu": "Ташкент 4",
+  "nameEn": "Tashkent 4",
+  "regionKey": "tashkent4"
+}
+
+
+### Update category
+PUT localhost:8080/api/v1/category/1
+Content-Type: application/json
+Authorization: Basic YmlnbWFuZ2NvbUBnbWFpbC5jb206MTIzNDU=
+
+{
+  "orderNumber": 1,
+  "nameUz": "Iqtisodiyot11",
+  "nameRu": "Экономика11",
+  "nameEn": "Economics11",
+  "categoryKey": "iqtisodiyot11"
+}
+
+
+### Delete category
+DELETE localhost:8080/api/v1/category/2
+
+
+### Get region list
+GET localhost:8080/api/v1/region
+
+
+### Get region by lang
+GET localhost:8080/api/v1/region/lang
+Accept-Language: EN
