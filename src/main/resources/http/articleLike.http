@@ -1,0 +1,18 @@
+### Article like create
+POST localhost:8080/api/v1/article-like
+Content-Type: application/json
+Authorization: Bearer {{jwt}}
+
+{
+  "articleId": "10033343-c8dc-4877-8496-b438b82d967f",
+  "emotion": "DISLIKE"
+}
+
+
+### Article like remove
+PUT localhost:8080/api/v1/article-like/remove/10033343-c8dc-4877-8496-b438b82d967f
+Content-Type: application/json
+Authorization: Bearer {{jwt}}
+
+{
+}

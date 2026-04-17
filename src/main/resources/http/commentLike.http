@@ -1,0 +1,18 @@
+### Article like create
+POST localhost:8080/api/v1/comment-like
+Content-Type: application/json
+Authorization: Bearer {{jwt}}
+
+{
+  "commentId": "a5f66155-07e2-4bac-b967-d80c514ffb86",
+  "emotion": "DISLIKE"
+}
+
+
+### Article like remove
+PUT localhost:8080/api/v1/comment-like/remove/a5f66155-07e2-4bac-b967-d80c514ffb86
+Content-Type: application/json
+Authorization: Bearer {{jwt}}
+
+{
+}

@@ -1,0 +1,77 @@
+### Create
+POST localhost:8080/api/v1/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+{
+  "name": "Eshmat3",
+  "surname": "Eshmatov3",
+  "username": "eshmat3@gmail.com",
+  "password": "12345",
+  "roleList": [
+    "ROLE_USER",
+    "ROLE_ADMIN"
+  ]
+}
+
+
+### Update
+PUT localhost:8080/api/v1/profile/3
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+{
+  "name": "Eshmat31",
+  "surname": "Eshmatov31",
+  "username": "eshmat31@gmail.com",
+  "roleList": [
+    "ROLE_USER",
+    "ROLE_ADMIN"
+  ]
+}
+
+
+### Get by id
+GET localhost:8080/api/v1/profile/3
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+### Update Detail
+PUT localhost:8080/api/v1/profile/detail
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+{
+  "name": "Eshmat33",
+  "surname": "Eshmatov33"
+}
+
+
+### Pagination
+GET localhost:8080/api/v1/profile/pagination?page=1&size=2
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+
+### Delete
+DELETE localhost:8080/api/v1/profile/1
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+### Update Password
+PUT localhost:8080/api/v1/profile/password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+{
+  "currentPassword": "12345",
+  "newPassword": "mazgi"
+}
+
+
+### filer
+POST localhost:8080/api/v1/profile/filter
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+{
+  "query": "1",
+  "role": "ROLE_ADMIN"
+}
