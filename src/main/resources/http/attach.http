@@ -1,0 +1,23 @@
+### createa attach
+POST http://localhost:8080/api/v1/attach/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="zari.jpg"
+
+< C:\Users\Bobur_Jumaniyazov\Desktop\images\zari.jpg
+
+
+### Open
+GET http://localhost:8080/api/v1/attach/open/8a6c73cf-f39c-433f-b793-c5585b023530.jpg
+
+### Download
+GET http://localhost:8080/api/v1/attach/download/8f5f60ec-e483-472b-ab93-4b82fe494022.jpg
+
+### Pagination
+GET http://localhost:8080/api/v1/attach?page=1&size=10
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA
+
+### Delete
+DELETE http://localhost:8080/api/v1/attach/8f5f60ec-e483-472b-ab93-4b82fe494022.jpg
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwidXNlcm5hbWUiOiJiaWdtYW5nY29tQGdtYWlsLmNvbSIsInN1YiI6ImJpZ21hbmdjb21AZ21haWwuY29tIiwiaWF0IjoxNzUwMzAyODkxLCJleHAiOjE3NTAzODkyOTF9.jiApspABtlGP2x8zYvQkRnqqvl16o2VOIv_p6-8-Z9eQb0R5DsN3sjpWTADpijxEK0FvTVhWFe7iRRV9N9CwAA

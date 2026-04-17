@@ -1,0 +1,44 @@
+### 1. Comment create
+POST localhost:8080/api/v1/comment
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+
+{
+  "content": "Lashara4",
+  "articleId": "10033343-c8dc-4877-8496-b438b82d967f"
+}
+
+
+### 2. Comment update
+PUT localhost:8080/api/v1/comment/dcda6e70-aa25-4a50-9654-5d463bc1ed16
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "content": "Lashara 4",
+  "articleId": "10033343-c8dc-4877-8496-b438b82d967f"
+}
+
+### 3. Comment delete
+DELETE localhost:8080/api/v1/comment/dcda6e70-aa25-4a50-9654-5d463bc1ed16
+Authorization:  Bearer {{jwt}}
+
+### 4. Get Replied Comment List by commentId
+GET localhost:8080/api/v1/comment/reply/dcda6e70-aa25-4a50-9654-5d463bc1ed16
+
+
+### 5. Comment List by ArticleId
+GET localhost:8080/api/v1/comment/article/10033343-c8dc-4877-8496-b438b82d967f
+
+
+### 6. Comment filter as Admin
+POST localhost:8080/api/v1/comment/filter?page=1&size=10
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "articleId": "10033343-c8dc-4877-8496-b438b82d967f",
+  "createdDateFrom": "2025-06-27",
+  "createdDateTo": "2025-06-30"
+}

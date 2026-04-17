@@ -1,0 +1,149 @@
+### 1. Article create
+POST localhost:8080/api/v1/article/moderator
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+
+{
+  "title": "Lashara",
+  "description": "Article 1 description",
+  "content": "Article 1 content",
+  "imageId": "9b31e07c-f5c8-45f8-978b-9f21772c0970.jpg",
+  "regionId": 1,
+  "readTime": 60,
+  "categoryList": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ],
+  "sectionList": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ]
+}
+
+
+### 2. Article update
+PUT localhost:8080/api/v1/article/moderator/744634f8-42fb-4925-9827-85b726fe1a97
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "title": "Article title 1",
+  "description": "Article 1 description",
+  "content": "Article 1 content",
+  "imageId": "9b31e07c-f5c8-45f8-978b-9f21772c0970.jpg",
+  "regionId": 1,
+  "readTime": 60,
+  "categoryList": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ],
+  "sectionList": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ]
+}
+
+
+### 3. Article delete
+DELETE localhost:8080/api/v1/article/moderator/744634f8-42fb-4925-9827-85b726fe1a97
+Authorization:  Bearer {{jwt}}
+
+### 4. Article change status
+PUT localhost:8080/api/v1/article/moderator/744634f8-42fb-4925-9827-85b726fe1a97/status
+Authorization:  Bearer {{jwt}}
+Content-Type:  application/json
+
+{
+  "status": "PUBLISHED"
+}
+
+### 5. Get last N Article By sectionId
+GET localhost:8080/api/v1/article/section/1
+
+
+### 6. Get last 12 published Article except given id list ordered_by_created_date
+POST localhost:8080/api/v1/article/last-12
+Content-Type: application/json
+
+{
+  "exceptArticleIdList": ["9d60fc1e-e21f-48c7-8c3f-562d104b3a76","a2920bb3-8863-472a-b5d0-3df04da0be0d"]
+}
+
+### 7. Get Last N Article by categoryId.
+GET localhost:8080/api/v1/article/by-category/1/10
+
+
+### 8. Get Last N Article by regionId.
+GET localhost:8080/api/v1/article/by-region/1/10
+
+
+### 9. Get Article By Id And Lang
+GET localhost:8080/api/v1/article/detail/10033343-c8dc-4877-8496-b438b82d967f
+Accept-Language: UZ
+
+
+### 11. Get Last 4 Article By sectionId, except given article id.
+GET localhost:8080/api/v1/article/section-small/1
+
+
+###  12. Get 4 most read articles, except given article id
+GET localhost:8080/api/v1/article/most-read/10033343-c8dc-4877-8496-b438b82d967f
+
+
+###  13. Increase Article View Count by Article Id
+GET localhost:8080/api/v1/article/view-count/10033343-c8dc-4877-8496-b438b82d967f
+
+
+###  14. Increase Article Share Count by Article Id
+GET localhost:8080/api/v1/article/shared-count/10033343-c8dc-4877-8496-b438b82d967f
+
+
+### 15. Article filter as User
+POST localhost:8080/api/v1/article/filter?page=1&size=10
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "title": "mazgi",
+  "sectionId": 1,
+  "regionId": 2
+}
+
+
+### 16. Article filter as Admin
+POST localhost:8080/api/v1/article/moderator/filter?page=1&size=10
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "title": "mazgi",
+  "sectionId": 1
+}
+
+
+### 17. Article filter as Admin
+POST localhost:8080/api/v1/article/admin/filter?page=1&size=10
+Content-Type: application/json
+Authorization:  Bearer {{jwt}}
+
+{
+  "createdDateFrom": "2025-06-27",
+  "createdDateTo": "2025-06-29"
+}
