@@ -101,7 +101,7 @@ public class ArticleService {
     public String changeStatus(String articleId, ArticleStatus status) {
         int effectedRows = articleRepository.changeStatus(articleId, status);
         if (effectedRows > 0) {
-            return "Article status change";
+            return "Article status changed";
         } else {
             return "Something went wrong";
         }

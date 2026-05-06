@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface CommentRepository extends CrudRepository<CommentEntity, String> {
+public interface    CommentRepository extends CrudRepository<CommentEntity, String> {
     @Transactional
     @Modifying
     @Query("update CommentEntity set visible = false where id = ?1")
