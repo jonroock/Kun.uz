@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import ArticlesPage from './pages/ArticlePage';
@@ -11,6 +12,7 @@ function App() {
         JSON.parse(localStorage.getItem('user')) || null
     );
     const [currentPage, setCurrentPage] = useState('home');
+    const [authPage, setAuthPage] = useState('login');
 
     const handleLogin = (userData) => {
         setUser(userData);
@@ -22,10 +24,19 @@ function App() {
         localStorage.removeItem('user');
         setUser(null);
         setCurrentPage('home');
+        setAuthPage('login');
     };
 
     if (!user) {
-        return <LoginPage onLogin={handleLogin} />;
+        if (authPage === 'register') {
+            return <RegisterPage onSwitch={() => setAuthPage('login')} />;
+        }
+        return (
+            <LoginPage
+                onLogin={handleLogin}
+                onSwitch={() => setAuthPage('register')}
+            />
+        );
     }
 
     const isModerator = user.roleList && user.roleList.includes('ROLE_MODERATOR');

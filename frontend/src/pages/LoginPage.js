@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { login } from '../services/api';
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, onSwitch }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -43,6 +43,12 @@ function LoginPage({ onLogin }) {
                 <button style={styles.button} onClick={handleLogin}>
                     Login
                 </button>
+                <p style={styles.switchText}>
+                    Don't have an account?{' '}
+                    <span style={styles.switchLink} onClick={onSwitch}>
+                        Register
+                    </span>
+                </p>
             </div>
         </div>
     );
@@ -66,16 +72,8 @@ const styles = {
         flexDirection: 'column',
         gap: '15px'
     },
-    title: {
-        textAlign: 'center',
-        color: '#e63946',
-        margin: 0
-    },
-    subtitle: {
-        textAlign: 'center',
-        color: '#333',
-        margin: 0
-    },
+    title: { textAlign: 'center', color: '#e63946', margin: 0 },
+    subtitle: { textAlign: 'center', color: '#333', margin: 0 },
     input: {
         padding: '12px',
         borderRadius: '6px',
@@ -91,11 +89,9 @@ const styles = {
         fontSize: '16px',
         cursor: 'pointer'
     },
-    error: {
-        color: 'red',
-        textAlign: 'center',
-        margin: 0
-    }
+    error: { color: 'red', textAlign: 'center', margin: 0 },
+    switchText: { textAlign: 'center', fontSize: '14px', margin: 0 },
+    switchLink: { color: '#e63946', cursor: 'pointer', fontWeight: 'bold' }
 };
 
 export default LoginPage;
