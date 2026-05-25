@@ -137,4 +137,21 @@ public class AuthService {
         response.setJwt(JwtUtil.encode(entity.getUsername(), response.getRoleList()));
         return response;
     }
+
+    public String regEmailVerificationByCode(String username, int code) {
+        Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleIsTrue(username);
+        if (existOptional.isEmpty()) {
+            throw new AppBadException("Username not found");
+        }
+        ProfileEntity profile = existOptional.get();
+        if (!profile.getStatus().equals(ProfileStatus.NOT_ACTIVE)) {
+            throw new AppBadException("Already verified");
+        }
+        if (emailHistoryService.isSmsSendToAccount(username, code)) {
+            profile.setStatus(ProfileStatus.ACTIVE);
+            profileRepository.save(profile);
+            return "Verification successfully completed";
+        }
+        throw new AppBadException("Wrong or expired code");
+    }
 }

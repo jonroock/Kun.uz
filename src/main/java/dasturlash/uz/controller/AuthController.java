@@ -36,4 +36,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
+    @PostMapping("/registration/email/verification/code")
+    public ResponseEntity<String> verifyByCode(@RequestBody VerificationBySmsDTO dto) {
+        return ResponseEntity.ok(authService.regEmailVerificationByCode(dto.getPhoneNumber(), Integer.parseInt(dto.getCode())));
+    }
+
 }

@@ -6,6 +6,7 @@ import ProfilePage from './pages/ProfilePage';
 import ArticlesPage from './pages/ArticlePage';
 import WriteArticlePage from './pages/WriteArticlePage';
 import MyArticlesPage from './pages/MyArticlesPage';
+import PublisherPage from './pages/PublisherPage';
 
 function App() {
     const [user, setUser] = useState(
@@ -56,6 +57,13 @@ function App() {
                         onClick={() => setCurrentPage('articles')}>
                         📰 Articles
                     </button>
+                    {user.roleList && user.roleList.includes('ROLE_PUBLISH') && (
+                        <button
+                            style={currentPage === 'publisher' ? styles.activeLink : styles.navLink}
+                            onClick={() => setCurrentPage('publisher')}>
+                            📋 Publisher
+                        </button>
+                    )}
                     {isModerator && (
                         <button
                             style={currentPage === 'write' ? styles.activeLink : styles.navLink}
@@ -91,6 +99,7 @@ function App() {
             {currentPage === 'write' && <WriteArticlePage user={user} />}
             {currentPage === 'myarticles' && <MyArticlesPage user={user} />}
             {currentPage === 'profile' && <ProfilePage user={user} />}
+            {currentPage === 'publisher' && <PublisherPage />}
         </div>
     );
 }

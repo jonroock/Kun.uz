@@ -40,30 +40,18 @@ public class EmailSenderService {
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
                 "    <meta charset=\"UTF-8\">\n" +
-                "    <title>Title</title>\n" +
+                "    <title>Kun.uz Verification</title>\n" +
                 "</head>\n" +
                 "<body>\n" +
-                "\n" +
-                "<h1 style=\"text-align: center\">Kunuz Portaliga xush kelibsiz.</h1>\n" +
-                "<br>\n" +
-                "<h4>Ro'yhatdan o'tishni tugatish uchun quyidagi linkga bosing</h4>\n" +
-                "<a style=\" background-color: indianred;\n" +
-                "  color: black;\n" +
-                "  padding: 10px 20px;\n" +
-                "  text-align: center;\n" +
-                "  text-decoration: none;\n" +
-                "  display: inline-block;\"\n" +
-                "   href=\"%s/api/v1/auth/registration/email/verification/%s\">Ro'yhatdan\n" +
-                "    o'tishni tugatish</a>\n" +
-                "\n" +
-                "\n" +
+                "<h1 style=\"text-align: center\">Kun.uz Portaliga xush kelibsiz!</h1>\n" +
+                "<h4>Ro'yhatdan o'tishni tugatish uchun quyidagi kodni kiriting:</h4>\n" +
+                "<h2 style=\"text-align: center; background-color: #e63946; color: white; " +
+                "padding: 20px; letter-spacing: 10px; font-size: 36px;\">%d</h2>\n" +
+                "<p>Bu kod 60 daqiqa davomida amal qiladi.</p>\n" +
                 "</body>\n" +
                 "</html>";
-        String jwtToken = JwtUtil.encodeForRegistration(toAccount, smsCode);
-        body = String.format(body, serverUrl, jwtToken);
-        // send
-        sendMimeMessage("Registration complete", body, toAccount);
-        // save to db
+        body = String.format(body, smsCode);
+        sendMimeMessage("Kun.uz - Verification Code", body, toAccount);
         emailHistoryService.create(body, smsCode, toAccount);
     }
 
