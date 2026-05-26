@@ -7,6 +7,7 @@ function MyArticlesPage() {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [likeCounts, setLikeCounts] = useState({});
 
     useEffect(() => {
         loadMyArticles();
@@ -14,8 +15,21 @@ function MyArticlesPage() {
 
     const loadMyArticles = async () => {
         try {
-            const response = await axios.post(`${API_URL}/article/moderator/filter`, {});
+            const jwt = localStorage.getItem('jwt');
+            const response = await axios.post(
+                `${API_URL}/article/admin/filter?page=0&size=20`,
+                {},
+                { headers: { Authorization: `Bearer ${jwt}` } }
+            );
             setArticles(response.data.content);
+            const counts = {};
+            await Promise.all(response.data.content.map(async (article) => {
+                try {
+                    const res = await axios.get(`${API_URL}/article-like/count/${article.id}`);
+                    counts[article.id] = res.data;
+                } catch { counts[article.id] = 0; }
+            }));
+            setLikeCounts(counts);
         } catch (err) {
             setError('Failed to load articles!');
         } finally {
@@ -46,7 +60,7 @@ function MyArticlesPage() {
                         <div style={styles.footer}>
                             <span style={styles.meta}>⏱️ {article.readTime} min read</span>
                             <span style={styles.meta}>👁️ {article.viewCount || 0} views</span>
-                            <span style={styles.meta}>❤️ {article.likeCount || 0} likes</span>
+                            <span style={styles.meta}>❤️ {likeCounts[article.id] || 0} likes</span>
                         </div>
                     </div>
                 ))

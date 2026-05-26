@@ -29,4 +29,12 @@ public class ArticleLikeController {
     public ResponseEntity<Boolean> remove(@PathVariable("articleId") String articleId) {
         return ResponseEntity.ok(articleLikeService.remove(articleId));
     }
+    @GetMapping("/count/{articleId}")
+    public ResponseEntity<Long> getLikeCount(@PathVariable("articleId") String articleId) {
+        return ResponseEntity.ok(articleLikeService.getLikeCount(articleId));
+    }
+    @GetMapping("/my/{articleId}")
+    public ResponseEntity<Boolean> isLiked(@PathVariable("articleId") String articleId) {
+        return ResponseEntity.ok(articleLikeService.isLikedByMe(articleId));
+    }
 }

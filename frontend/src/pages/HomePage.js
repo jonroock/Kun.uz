@@ -14,6 +14,8 @@ function HomePage({ user }) {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [likeCounts, setLikeCounts] = useState({});
+    const [likedArticles, setLikedArticles] = useState({});
+    const [savedArticleDetails, setSavedArticleDetails] = useState({});
 
     const getHeaders = () => ({
         headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
@@ -38,21 +40,42 @@ function HomePage({ user }) {
 
     const fetchLikeCounts = async (articleList) => {
         const counts = {};
+        const liked = {};
         await Promise.all(articleList.map(async (article) => {
             try {
                 const res = await axios.get(`${API_URL}/article-like/count/${article.id}`);
                 counts[article.id] = res.data;
             } catch {
-                counts[article.id] = article.likeCount || 0;
+                counts[article.id] = 0;
+            }
+            try {
+                const res = await axios.get(`${API_URL}/article-like/my/${article.id}`, getHeaders());
+                liked[article.id] = res.data;
+            } catch {
+                liked[article.id] = false;
             }
         }));
         setLikeCounts(counts);
+        setLikedArticles(liked);
     };
 
     const loadSavedArticles = async () => {
         try {
             const response = await getSavedArticles();
             setSavedArticles(response.data);
+            const details = {};
+            await Promise.all(response.data.map(async (item) => {
+                try {
+                    const res = await axios.get(`${API_URL}/article/detail/${item.articleId}`);
+                    details[item.articleId] = res.data;
+                    console.log('fetched detail for', item.articleId, res.data);
+                } catch (e) {
+                    console.error('Failed to fetch article', item.articleId, e);
+                    details[item.articleId] = null;
+                }
+            }));
+            console.log('all details:', details);
+            setSavedArticleDetails(details);
         } catch (err) {
             console.error('Failed to load saved articles');
         }
@@ -80,13 +103,19 @@ function HomePage({ user }) {
 
     const handleLike = async (articleId) => {
         try {
-            await axios.post(`${API_URL}/article-like`, {
-                articleId, emotion: 'LIKE'
-            }, getHeaders());
-            setLikeCounts(prev => ({ ...prev, [articleId]: (prev[articleId] || 0) + 1 }));
-            showMessage('Liked! ❤️');
+            if (likedArticles[articleId]) {
+                await axios.put(`${API_URL}/article-like/remove/${articleId}`, {}, getHeaders());
+                setLikeCounts(prev => ({ ...prev, [articleId]: Math.max((prev[articleId] || 1) - 1, 0) }));
+                setLikedArticles(prev => ({ ...prev, [articleId]: false }));
+                showMessage('Like removed! 🤍');
+            } else {
+                await axios.post(`${API_URL}/article-like`, { articleId, emotion: 'LIKE' }, getHeaders());
+                setLikeCounts(prev => ({ ...prev, [articleId]: (prev[articleId] || 0) + 1 }));
+                setLikedArticles(prev => ({ ...prev, [articleId]: true }));
+                showMessage('Liked! ❤️');
+            }
         } catch (err) {
-            showMessage('Failed to like! ❌');
+            showMessage('Failed! ❌');
         }
     };
 
@@ -99,7 +128,6 @@ function HomePage({ user }) {
         } catch {
             setComments([]);
         }
-        // increment view count
         try {
             await axios.get(`${API_URL}/article/view-count/${article.id}`);
         } catch {}
@@ -133,13 +161,11 @@ function HomePage({ user }) {
 
     return (
         <div style={styles.container}>
-            {/* Welcome Banner */}
             <div style={styles.banner}>
                 <h2 style={styles.bannerText}>Welcome back, {user.name}! 👋</h2>
                 <p style={styles.bannerSub}>Stay up to date with the latest news</p>
             </div>
 
-            {/* Tabs */}
             <div style={styles.tabs}>
                 <button style={activeTab === 'latest' ? styles.activeTab : styles.tab}
                         onClick={() => setActiveTab('latest')}>📰 Latest News</button>
@@ -150,15 +176,13 @@ function HomePage({ user }) {
             {message && <p style={styles.message}>{message}</p>}
 
             <div style={styles.content}>
-                {/* Latest Articles */}
                 {activeTab === 'latest' && (
                     loading ? <p style={styles.empty}>Loading...</p> :
                         articles.length === 0 ? <p style={styles.empty}>No articles yet!</p> :
                             <div style={styles.grid}>
                                 {articles.map((article) => (
                                     <div key={article.id} style={styles.card}>
-                                        <h4 style={styles.articleTitle}
-                                            onClick={() => openArticle(article)}>
+                                        <h4 style={styles.articleTitle} onClick={() => openArticle(article)}>
                                             {article.title}
                                         </h4>
                                         <p style={styles.description}>{article.description}</p>
@@ -171,8 +195,10 @@ function HomePage({ user }) {
                                             <button style={styles.readBtn} onClick={() => openArticle(article)}>
                                                 📖 Read
                                             </button>
-                                            <button style={styles.likeBtn} onClick={() => handleLike(article.id)}>
-                                                ❤️ Like
+                                            <button
+                                                style={likedArticles[article.id] ? styles.likedBtn : styles.likeBtn}
+                                                onClick={() => handleLike(article.id)}>
+                                                {likedArticles[article.id] ? '❤️' : '🤍'} Like
                                             </button>
                                             <button style={styles.saveBtn} onClick={() => handleSave(article.id)}>
                                                 🔖 Save
@@ -183,27 +209,29 @@ function HomePage({ user }) {
                             </div>
                 )}
 
-                {/* Saved Articles */}
                 {activeTab === 'saved' && (
                     savedArticles.length === 0 ?
                         <p style={styles.empty}>No saved articles yet!</p> :
-                        savedArticles.map((item) => (
-                            <div key={item.id} style={styles.savedCard}>
-                                <div>
-                                    <p style={styles.savedId}>Article ID: {item.articleId}</p>
-                                    <p style={styles.savedDate}>
-                                        Saved: {new Date(item.createdDate).toLocaleDateString()}
-                                    </p>
+                        savedArticles.map((item) => {
+                            const detail = savedArticleDetails[item.articleId];
+                            return (
+                                <div key={item.id} style={styles.savedCard}>
+                                    <div>
+                                        <p style={styles.savedTitle}>{detail ? detail.title : 'Loading...'}</p>
+                                        <p style={styles.savedDesc}>{detail ? detail.description : ''}</p>
+                                        <p style={styles.savedDate}>
+                                            Saved: {new Date(item.createdDate).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <button style={styles.removeBtn} onClick={() => handleRemove(item.articleId)}>
+                                        🗑️ Remove
+                                    </button>
                                 </div>
-                                <button style={styles.removeBtn} onClick={() => handleRemove(item.articleId)}>
-                                    🗑️ Remove
-                                </button>
-                            </div>
-                        ))
+                            );
+                        })
                 )}
             </div>
 
-            {/* Article Modal */}
             {selectedArticle && (
                 <div style={styles.overlay} onClick={closeArticle}>
                     <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -220,8 +248,6 @@ function HomePage({ user }) {
                         <div style={styles.modalContent}>
                             {selectedArticle.content || 'No content available.'}
                         </div>
-
-                        {/* Comments */}
                         <div style={styles.commentsSection}>
                             <h4 style={styles.commentsTitle}>💬 Comments</h4>
                             <div style={styles.addComment}>
@@ -269,15 +295,16 @@ const styles = {
     stats: { display: 'flex', gap: '12px', color: '#888', fontSize: '13px' },
     actions: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
     readBtn: { padding: '7px 12px', backgroundColor: '#457b9d', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' },
-    likeBtn: { padding: '7px 12px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' },
+    likeBtn: { padding: '7px 12px', backgroundColor: 'white', color: '#333', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' },
+    likedBtn: { padding: '7px 12px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' },
     saveBtn: { padding: '7px 12px', backgroundColor: '#2a9d8f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' },
     savedCard: { backgroundColor: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    savedId: { margin: 0, fontWeight: 'bold', color: '#333' },
+    savedTitle: { margin: '0 0 4px', fontWeight: 'bold', color: '#333', fontSize: '15px' },
+    savedDesc: { margin: '0 0 4px', color: '#666', fontSize: '13px' },
     savedDate: { margin: '5px 0 0', color: '#888', fontSize: '13px' },
     removeBtn: { padding: '8px 16px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' },
     message: { textAlign: 'center', fontWeight: 'bold', color: 'green', margin: '10px 0' },
     empty: { color: '#888', textAlign: 'center', marginTop: '50px', fontSize: '18px' },
-    // Modal
     overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', zIndex: 1000, overflowY: 'auto', padding: '30px 20px' },
     modal: { backgroundColor: 'white', borderRadius: '12px', padding: '30px', maxWidth: '700px', width: '100%', maxHeight: '90vh', overflowY: 'auto' },
     modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },

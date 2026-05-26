@@ -1,6 +1,7 @@
 package dasturlash.uz.repository;
 
 import dasturlash.uz.entity.ArticleLikeEntity;
+import dasturlash.uz.enums.LikeEmotion;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface ArticleLikeRepository extends CrudRepository<ArticleLikeEntity,
     @Modifying
     @Query("update ArticleLikeEntity  set visible = false, deletedDate = current_timestamp where articleId =?1 and profileId =?2 and visible = true")
     int deleteByArticleIdAndProfileId(String articleId, Integer profileId);
+
+    Long countByArticleIdAndEmotionAndVisibleTrue(String articleId, LikeEmotion likeEmotion);
+    boolean existsByArticleIdAndProfileIdAndVisibleTrue(String articleId, Integer profileId);
 }

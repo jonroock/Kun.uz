@@ -20,8 +20,8 @@ function PublisherPage() {
         setLoading(true);
         try {
             const response = await axios.post(
-                `${API_URL}/article/moderator/filter?page=1&size=20`,
-                {},
+                `${API_URL}/article/admin/filter?page=0&size=20`,
+                { status: 'NOT_PUBLISHED' },
                 getHeaders()
             );
             setArticles(response.data.content || []);

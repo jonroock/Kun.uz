@@ -50,4 +50,13 @@ public class ArticleLikeService {
         return effectedResult != 0;
     }
 
+    public Long getLikeCount(String articleId) {
+        return articleLikeRepository.countByArticleIdAndEmotionAndVisibleTrue(articleId, LikeEmotion.LIKE);
+    }
+
+    public Boolean isLikedByMe(String articleId) {
+        Integer currentProfileId = SpringSecurityUtil.currentProfileId();
+        return articleLikeRepository.existsByArticleIdAndProfileIdAndVisibleTrue(articleId, currentProfileId);
+    }
+
 }
