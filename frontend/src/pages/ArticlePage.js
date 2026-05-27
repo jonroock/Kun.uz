@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 const API_URL = 'http://localhost:8080/api/v1';
 
 function ArticlesPage({ user }) {
+    const location = useLocation();
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -13,22 +15,38 @@ function ArticlesPage({ user }) {
     const [openComments, setOpenComments] = useState({});
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState({});
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedSection, setSelectedSection] = useState(null);
+    const [selectedRegion, setSelectedRegion] = useState(null);
 
     const getHeaders = () => ({
         headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
     });
 
     useEffect(() => {
+        const state = location.state || {};
+        setSelectedCategory(state.categoryId || null);
+        setSelectedSection(state.sectionId || null);
+        setSelectedRegion(state.regionId || null);
+    }, [location.state]);
+
+    useEffect(() => {
         loadArticles();
-    }, []);
+    }, [selectedCategory, selectedSection, selectedRegion]);
 
     const loadArticles = async () => {
+        setLoading(true);
         try {
-            const response = await axios.get(`${API_URL}/article/by-region/1/10`);
-            setArticles(response.data);
+            const response = await axios.post(`${API_URL}/article/filter`, {
+                categoryId: selectedCategory || null,
+                regionId: selectedRegion || null,
+                sectionId: selectedSection || null
+            });
+            const articleList = response.data.content || [];
+            setArticles(articleList);
             const counts = {};
             const liked = {};
-            await Promise.all(response.data.map(async (article) => {
+            await Promise.all(articleList.map(async (article) => {
                 try {
                     const res = await axios.get(`${API_URL}/article-like/count/${article.id}`);
                     counts[article.id] = res.data;
@@ -60,18 +78,14 @@ function ArticlesPage({ user }) {
                 setLikedArticles(prev => ({ ...prev, [articleId]: true }));
                 showMessage('Liked! ❤️');
             }
-        } catch (err) {
-            showMessage('Failed! ❌');
-        }
+        } catch { showMessage('Failed! ❌'); }
     };
 
     const handleSave = async (articleId) => {
         try {
             await axios.post(`${API_URL}/saved-article`, { articleId }, getHeaders());
             showMessage('Article saved! ✅');
-        } catch (err) {
-            showMessage('Failed to save! ❌');
-        }
+        } catch { showMessage('Failed to save! ❌'); }
     };
 
     const toggleComments = async (articleId) => {
@@ -102,25 +116,26 @@ function ArticlesPage({ user }) {
         setTimeout(() => setMessage(''), 3000);
     };
 
-    if (loading) return <div style={styles.center}>Loading articles...</div>;
-    if (error) return <div style={{ ...styles.center, color: 'red' }}>{error}</div>;
+    if (error) return <div style={styles.center}>{error}</div>;
 
     return (
         <div style={styles.container}>
-            <h3 style={styles.pageTitle}>📰 Latest Articles</h3>
             {message && <p style={styles.message}>{message}</p>}
 
-            {articles.length === 0 ? (
-                <p style={styles.empty}>No published articles yet!</p>
+            {loading ? (
+                <p style={styles.center}>Loading...</p>
+            ) : articles.length === 0 ? (
+                <p style={styles.center}>No articles found!</p>
             ) : (
                 articles.map((article) => (
                     <div key={article.id} style={styles.card}>
+                        <div style={styles.catPill}>{article.categoryName || 'General'}</div>
                         <h4 style={styles.articleTitle}>{article.title}</h4>
                         <p style={styles.description}>{article.description}</p>
                         <div style={styles.stats}>
                             <span>⏱️ {article.readTime || 0} min</span>
-                            <span>👁️ {article.viewCount || 0} views</span>
-                            <span style={{ color: '#e63946' }}>❤️ {likeCounts[article.id] || 0} likes</span>
+                            <span>👁️ {article.viewCount || 0}</span>
+                            <span style={{ color: '#e63946' }}>❤️ {likeCounts[article.id] || 0}</span>
                         </div>
                         <div style={styles.actions}>
                             <button
@@ -170,28 +185,27 @@ function ArticlesPage({ user }) {
 }
 
 const styles = {
-    container: { maxWidth: '800px', margin: '30px auto', padding: '0 20px' },
-    pageTitle: { color: '#333', fontSize: '22px', margin: '0 0 20px' },
-    card: { backgroundColor: 'white', padding: '24px', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '20px' },
-    articleTitle: { color: '#333', margin: '0 0 8px', fontSize: '18px' },
-    description: { color: '#666', fontSize: '14px', margin: '0 0 12px' },
-    stats: { display: 'flex', gap: '16px', color: '#888', fontSize: '13px', marginBottom: '12px' },
-    actions: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
-    likeBtn: { padding: '8px 14px', backgroundColor: 'white', color: '#333', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer' },
-    likedBtn: { padding: '8px 14px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-    commentBtn: { padding: '8px 14px', backgroundColor: '#457b9d', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-    saveBtn: { padding: '8px 14px', backgroundColor: '#2a9d8f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-    commentsSection: { marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '16px' },
+    container: { maxWidth: '800px', margin: '0 auto' },
+    card: { backgroundColor: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '12px' },
+    catPill: { display: 'inline-block', padding: '2px 10px', borderRadius: '12px', fontSize: '11px', color: '#e63946', backgroundColor: '#fff0f1', marginBottom: '6px' },
+    articleTitle: { color: '#333', margin: '0 0 6px', fontSize: '16px', fontWeight: '500' },
+    description: { color: '#666', fontSize: '14px', margin: '0 0 10px' },
+    stats: { display: 'flex', gap: '16px', color: '#888', fontSize: '13px', marginBottom: '10px' },
+    actions: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
+    likeBtn: { padding: '6px 14px', backgroundColor: 'white', color: '#333', border: '1px solid #ddd', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
+    likedBtn: { padding: '6px 14px', backgroundColor: '#fff0f1', color: '#e63946', border: '1px solid #e63946', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
+    commentBtn: { padding: '6px 14px', backgroundColor: '#f0f4f8', color: '#457b9d', border: '1px solid #d0dde8', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
+    saveBtn: { padding: '6px 14px', backgroundColor: '#f0faf8', color: '#2a9d8f', border: '1px solid #b0ddd6', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
+    commentsSection: { marginTop: '14px', borderTop: '1px solid #f0f0f0', paddingTop: '14px' },
     addComment: { display: 'flex', gap: '8px', marginBottom: '12px' },
-    commentInput: { flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px' },
-    postBtn: { padding: '10px 16px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-    commentCard: { backgroundColor: '#f8f9fa', padding: '12px', borderRadius: '6px', marginBottom: '8px' },
-    commentContent: { margin: '0 0 4px', color: '#333', fontSize: '14px' },
-    commentMeta: { color: '#888', fontSize: '12px' },
-    noComments: { color: '#888', textAlign: 'center', fontSize: '14px' },
-    message: { textAlign: 'center', fontWeight: 'bold', color: 'green', marginBottom: '16px' },
-    center: { textAlign: 'center', marginTop: '100px', fontSize: '18px' },
-    empty: { color: '#888', textAlign: 'center', marginTop: '50px', fontSize: '18px' }
+    commentInput: { flex: 1, padding: '8px 12px', borderRadius: '20px', border: '1px solid #ddd', fontSize: '13px' },
+    postBtn: { padding: '8px 16px', backgroundColor: '#e63946', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
+    commentCard: { backgroundColor: '#f8f9fa', padding: '10px 14px', borderRadius: '10px', marginBottom: '8px' },
+    commentContent: { margin: '0 0 4px', color: '#333', fontSize: '13px' },
+    commentMeta: { color: '#aaa', fontSize: '11px' },
+    noComments: { color: '#aaa', textAlign: 'center', fontSize: '13px' },
+    message: { textAlign: 'center', fontWeight: '500', color: 'green', marginBottom: '12px' },
+    center: { textAlign: 'center', marginTop: '60px', fontSize: '16px', color: '#888' }
 };
 
 export default ArticlesPage;

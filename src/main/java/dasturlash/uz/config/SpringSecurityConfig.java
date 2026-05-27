@@ -48,6 +48,8 @@ public class SpringSecurityConfig {
             "/api/v1/article/filter",
             "/api/v1/comment/article/*",
             "/api/v1/comment/reply/*",
+            "/api/v1/section/lang",
+            "/api/v1/article/detail/*",
     };
 
     @Bean

@@ -48,8 +48,8 @@ public class ArticleCustomRepository {
             params.put("sectionId", filter.getSectionId());
         }
         if (filter.getCategoryId() != null) {
-            selectQueryBuilder.append(" inner join ArticleCategoryEntity ace on ace.categoryId = a.id  ");
-            countQueryBuilder.append(" inner join ArticleCategoryEntity ace on ace.categoryId = a.id  ");
+            selectQueryBuilder.append(" inner join ArticleCategoryEntity ace on ace.articleId = a.id  ");
+            countQueryBuilder.append(" inner join ArticleCategoryEntity ace on ace.articleId = a.id  ");
 
             builder.append(" and  ace.categoryId =:categoryId");
             params.put("categoryId", filter.getCategoryId());
