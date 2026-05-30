@@ -129,6 +129,14 @@ function ArticlesPage({ user }) {
             ) : (
                 articles.map((article) => (
                     <div key={article.id} style={styles.card}>
+                        {article.image?.url && (
+                            <img
+                                src={article.image.url}
+                                alt={article.title}
+                                style={styles.articleImage}
+                                onError={(e) => e.target.style.display = 'none'}
+                            />
+                        )}
                         <div style={styles.catPill}>{article.categoryName || 'General'}</div>
                         <h4 style={styles.articleTitle}>{article.title}</h4>
                         <p style={styles.description}>{article.description}</p>
@@ -205,7 +213,9 @@ const styles = {
     commentMeta: { color: '#aaa', fontSize: '11px' },
     noComments: { color: '#aaa', textAlign: 'center', fontSize: '13px' },
     message: { textAlign: 'center', fontWeight: '500', color: 'green', marginBottom: '12px' },
-    center: { textAlign: 'center', marginTop: '60px', fontSize: '16px', color: '#888' }
+    center: { textAlign: 'center', marginTop: '60px', fontSize: '16px', color: '#888' },
+    articleImage: {width: '100%', height: '200px', objectFit: 'cover',  borderRadius: '8px', marginBottom: '10px'
+    },
 };
 
 export default ArticlesPage;

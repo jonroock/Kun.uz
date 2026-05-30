@@ -50,6 +50,7 @@ public class SpringSecurityConfig {
             "/api/v1/comment/reply/*",
             "/api/v1/section/lang",
             "/api/v1/article/detail/*",
+            "/api/v1/attach/open/*",
     };
 
     @Bean
@@ -81,7 +82,7 @@ public class SpringSecurityConfig {
                     .authenticated();
         }).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http.httpBasic(Customizer.withDefaults()); // httpBasic-dan foydanalish uchun u enable qilindi (ishlatmoqchi ekanligimiz yozildi) (yoqib qo'yild).
+        http.httpBasic(Customizer.withDefaults()); // httpBasic-dan foydanalish uchun u enable qilindi
 
         http.csrf(AbstractHttpConfigurer::disable); // csrf o'chirilgan
 

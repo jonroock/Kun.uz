@@ -28,7 +28,8 @@ function WriteArticlePage() {
     const loadRegions = async () => {
         try {
             const response = await axios.get(`${API_URL}/region/lang`, {
-                headers: { 'Accept-Language': 'EN' }
+                headers: { 'Accept-Language': 'EN' },
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`
             });
             setRegions(response.data);
         } catch (err) {
@@ -39,7 +40,8 @@ function WriteArticlePage() {
     const loadCategories = async () => {
         try {
             const response = await axios.get(`${API_URL}/category/lang`, {
-                headers: { 'Accept-Language': 'EN' }
+                headers: { 'Accept-Language': 'EN' },
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`
             });
             setCategoryList(response.data);
         } catch (err) {
@@ -50,7 +52,8 @@ function WriteArticlePage() {
     const loadSections = async () => {
         try {
             const response = await axios.get(`${API_URL}/section/lang`, {
-                headers: { 'Accept-Language': 'EN' }
+                headers: { 'Accept-Language': 'EN' },
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`
             });
             setSectionList(response.data);
         } catch (err) {
@@ -65,7 +68,12 @@ function WriteArticlePage() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axios.post(`${API_URL}/attach/upload`, formData);
+            const response = await axios.post(`${API_URL}/attach/upload`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             setImageId(response.data.id);
             setMessage('Image uploaded! ✅');
         } catch (err) {
@@ -188,7 +196,7 @@ function WriteArticlePage() {
                         onChange={(e) => setRegionId(e.target.value)}>
                         <option value="">Select region</option>
                         {regions.map(r => (
-                            <option key={r.id} value={r.id}>{r.nameEn}</option>
+                            <option key={r.id} value={r.id}>{r.name}</option>
                         ))}
                     </select>
                 </div>
@@ -217,7 +225,7 @@ function WriteArticlePage() {
                                     checked={selectedCategories.includes(cat.id)}
                                     onChange={() => handleCategoryChange(cat.id)}
                                 />
-                                {cat.nameEn}
+                                {cat.name}
                             </label>
                         ))}
                     </div>
@@ -234,7 +242,7 @@ function WriteArticlePage() {
                                     checked={selectedSections.includes(sec.id)}
                                     onChange={() => handleSectionChange(sec.id)}
                                 />
-                                {sec.nameEn}
+                                {sec.name}
                             </label>
                         ))}
                     </div>

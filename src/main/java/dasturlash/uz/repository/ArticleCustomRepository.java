@@ -68,6 +68,7 @@ public class ArticleCustomRepository {
 
         selectQueryBuilder.append(builder);
         countQueryBuilder.append(builder);
+        selectQueryBuilder.append(" ORDER BY a.publishedDate DESC ");
 
         // select query
         Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());

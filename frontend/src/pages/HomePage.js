@@ -28,9 +28,13 @@ function HomePage({ user }) {
 
     const loadArticles = async () => {
         try {
-            const response = await axios.get(`${API_URL}/article/by-region/1/10`);
-            setArticles(response.data);
-            fetchLikeCounts(response.data);
+            const response = await axios.post(
+                `${API_URL}/article/filter`,
+                {},
+                getHeaders()
+            );
+            setArticles(response.data.content || []);
+            fetchLikeCounts(response.data.content || []);
         } catch (err) {
             console.error('Failed to load articles');
         } finally {
@@ -66,15 +70,19 @@ function HomePage({ user }) {
             const details = {};
             await Promise.all(response.data.map(async (item) => {
                 try {
-                    const res = await axios.get(`${API_URL}/article/detail/${item.articleId}`);
+                    const res = await axios.get(
+                        `${API_URL}/article/detail/${item.articleId}`,
+                        { headers: {
+                                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                                'Accept-Language': 'UZ'
+                            }}
+                    );
                     details[item.articleId] = res.data;
-                    console.log('fetched detail for', item.articleId, res.data);
                 } catch (e) {
                     console.error('Failed to fetch article', item.articleId, e);
                     details[item.articleId] = null;
                 }
             }));
-            console.log('all details:', details);
             setSavedArticleDetails(details);
         } catch (err) {
             console.error('Failed to load saved articles');
@@ -182,6 +190,14 @@ function HomePage({ user }) {
                             <div style={styles.grid}>
                                 {articles.map((article) => (
                                     <div key={article.id} style={styles.card}>
+                                        {article.image?.url && (
+                                            <img
+                                                src={article.image.url}
+                                                alt={article.title}
+                                                style={styles.articleImage}
+                                                onError={(e) => e.target.style.display = 'none'}
+                                            />
+                                        )}
                                         <h4 style={styles.articleTitle} onClick={() => openArticle(article)}>
                                             {article.title}
                                         </h4>
@@ -212,23 +228,37 @@ function HomePage({ user }) {
                 {activeTab === 'saved' && (
                     savedArticles.length === 0 ?
                         <p style={styles.empty}>No saved articles yet!</p> :
-                        savedArticles.map((item) => {
-                            const detail = savedArticleDetails[item.articleId];
-                            return (
-                                <div key={item.id} style={styles.savedCard}>
-                                    <div>
-                                        <p style={styles.savedTitle}>{detail ? detail.title : 'Loading...'}</p>
-                                        <p style={styles.savedDesc}>{detail ? detail.description : ''}</p>
-                                        <p style={styles.savedDate}>
-                                            Saved: {new Date(item.createdDate).toLocaleDateString()}
-                                        </p>
+                        <div style={styles.grid}>
+                            {savedArticles.map((item) => {
+                                const detail = savedArticleDetails[item.articleId];
+                                return (
+                                    <div key={item.id} style={styles.card}>
+                                        <h4 style={styles.articleTitle} onClick={() => detail && openArticle(detail)}>
+                                            {detail ? detail.title : 'Loading...'}
+                                        </h4>
+                                        <p style={styles.description}>{detail ? detail.description : ''}</p>
+                                        <div style={styles.stats}>
+                                            <span>⏱️ {detail ? detail.readTime || 0 : 0} min</span>
+                                            <span>👁️ {detail ? detail.viewCount || 0 : 0}</span>
+                                            <span>❤️ {detail ? likeCounts[item.articleId] || 0 : 0}</span>
+                                        </div>
+                                        <div style={styles.actions}>
+                                            <button style={styles.readBtn} onClick={() => detail && openArticle(detail)}>
+                                                📖 Read
+                                            </button>
+                                            <button
+                                                style={likedArticles[item.articleId] ? styles.likedBtn : styles.likeBtn}
+                                                onClick={() => handleLike(item.articleId)}>
+                                                {likedArticles[item.articleId] ? '❤️' : '🤍'} Like
+                                            </button>
+                                            <button style={styles.removeBtn} onClick={() => handleRemove(item.articleId)}>
+                                                🗑️ Remove
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button style={styles.removeBtn} onClick={() => handleRemove(item.articleId)}>
-                                        🗑️ Remove
-                                    </button>
-                                </div>
-                            );
-                        })
+                                );
+                            })}
+                        </div>
                 )}
             </div>
 
@@ -321,7 +351,14 @@ const styles = {
     commentCard: { backgroundColor: '#f8f9fa', padding: '12px', borderRadius: '6px', marginBottom: '8px' },
     commentContent: { margin: '0 0 4px', color: '#333', fontSize: '14px' },
     commentMeta: { color: '#888', fontSize: '12px' },
-    noComments: { color: '#888', textAlign: 'center', fontSize: '14px' }
+    noComments: { color: '#888', textAlign: 'center', fontSize: '14px' },
+    articleImage: {
+        width: '100%',
+        height: '200px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        marginBottom: '10px'
+    }
 };
 
 export default HomePage;
