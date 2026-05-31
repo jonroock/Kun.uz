@@ -15,6 +15,9 @@ function ArticlesPage({ user }) {
     const [openComments, setOpenComments] = useState({});
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState({});
+    const [selectedArticle, setSelectedArticle] = useState(null);
+    const [modalComments, setModalComments] = useState([]);
+    const [newModalComment, setNewModalComment] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSection, setSelectedSection] = useState(null);
     const [selectedRegion, setSelectedRegion] = useState(null);
@@ -111,6 +114,37 @@ function ArticlesPage({ user }) {
         } catch { showMessage('Failed to comment! ❌'); }
     };
 
+    const openArticle = async (article) => {
+        setSelectedArticle(article);
+        setNewModalComment('');
+        try {
+            const res = await axios.get(`${API_URL}/comment/article/${article.id}`);
+            setModalComments(res.data.content || []);
+        } catch { setModalComments([]); }
+        try {
+            await axios.get(`${API_URL}/article/view-count/${article.id}`);
+        } catch {}
+    };
+
+    const closeArticle = () => {
+        setSelectedArticle(null);
+        setModalComments([]);
+    };
+
+    const handleAddModalComment = async () => {
+        if (!newModalComment.trim()) return;
+        try {
+            await axios.post(`${API_URL}/comment`, {
+                content: newModalComment,
+                articleId: selectedArticle.id
+            }, getHeaders());
+            setNewModalComment('');
+            const res = await axios.get(`${API_URL}/comment/article/${selectedArticle.id}`);
+            setModalComments(res.data.content || []);
+            showMessage('Comment added! 💬');
+        } catch { showMessage('Failed! ❌'); }
+    };
+
     const showMessage = (msg) => {
         setMessage(msg);
         setTimeout(() => setMessage(''), 3000);
@@ -129,23 +163,17 @@ function ArticlesPage({ user }) {
             ) : (
                 articles.map((article) => (
                     <div key={article.id} style={styles.card}>
-                        {article.image?.url && (
-                            <img
-                                src={article.image.url}
-                                alt={article.title}
-                                style={styles.articleImage}
-                                onError={(e) => e.target.style.display = 'none'}
-                            />
-                        )}
                         <div style={styles.catPill}>{article.categoryName || 'General'}</div>
                         <h4 style={styles.articleTitle}>{article.title}</h4>
-                        <p style={styles.description}>{article.description}</p>
                         <div style={styles.stats}>
                             <span>⏱️ {article.readTime || 0} min</span>
                             <span>👁️ {article.viewCount || 0}</span>
                             <span style={{ color: '#e63946' }}>❤️ {likeCounts[article.id] || 0}</span>
                         </div>
                         <div style={styles.actions}>
+                            <button style={styles.readBtn} onClick={() => openArticle(article)}>
+                                📖 Read
+                            </button>
                             <button
                                 style={likedArticles[article.id] ? styles.likedBtn : styles.likeBtn}
                                 onClick={() => handleLike(article.id)}>
@@ -188,18 +216,80 @@ function ArticlesPage({ user }) {
                     </div>
                 ))
             )}
+
+            {/* Modal */}
+            {selectedArticle && (
+                <div style={styles.overlay} onClick={closeArticle}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        {selectedArticle.image?.url && (
+                            <img
+                                src={selectedArticle.image.url}
+                                alt={selectedArticle.title}
+                                style={styles.modalImage}
+                                onError={(e) => e.target.style.display = 'none'}
+                            />
+                        )}
+                        <div style={styles.modalHeader}>
+                            <h3 style={styles.modalTitle}>{selectedArticle.title}</h3>
+                            <button style={styles.closeBtn} onClick={closeArticle}>✕</button>
+                        </div>
+                        <p style={styles.modalDescription}>{selectedArticle.description}</p>
+                        <div style={styles.modalStats}>
+                            <span>⏱️ {selectedArticle.readTime || 0} min read</span>
+                            <span>👁️ {selectedArticle.viewCount || 0} views</span>
+                            <span>❤️ {likeCounts[selectedArticle.id] || 0} likes</span>
+                        </div>
+                        <div style={styles.modalContent}>
+                            {selectedArticle.content || 'No content available.'}
+                        </div>
+                        <div style={styles.commentsSection}>
+                            <h4 style={styles.commentsTitle}>💬 Comments</h4>
+                            <div style={styles.addComment}>
+                                <input
+                                    style={styles.commentInput}
+                                    type="text"
+                                    placeholder="Write a comment..."
+                                    value={newModalComment}
+                                    onChange={(e) => setNewModalComment(e.target.value)}
+                                />
+                                <button style={styles.postBtn} onClick={handleAddModalComment}>Post</button>
+                            </div>
+                            {modalComments.length === 0 ?
+                                <p style={styles.noComments}>No comments yet. Be the first!</p> :
+                                modalComments.map((comment) => (
+                                    <div key={comment.id} style={styles.commentCard}>
+                                        <p style={styles.commentContent}>{comment.content}</p>
+                                        <span style={styles.commentMeta}>
+                                            {new Date(comment.createdDate).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
 const styles = {
-    container: { maxWidth: '800px', margin: '0 auto' },
-    card: { backgroundColor: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '12px' },
+    container: { maxWidth: '900px', margin: '0 auto' },
+    card: {
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '10px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        marginBottom: '12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+    },
     catPill: { display: 'inline-block', padding: '2px 10px', borderRadius: '12px', fontSize: '11px', color: '#e63946', backgroundColor: '#fff0f1', marginBottom: '6px' },
-    articleTitle: { color: '#333', margin: '0 0 6px', fontSize: '16px', fontWeight: '500' },
-    description: { color: '#666', fontSize: '14px', margin: '0 0 10px' },
+    articleTitle: { color: '#333', margin: '0 0 8px', fontSize: '16px', fontWeight: '500' },
     stats: { display: 'flex', gap: '16px', color: '#888', fontSize: '13px', marginBottom: '10px' },
     actions: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
+    readBtn: { padding: '6px 14px', backgroundColor: '#457b9d', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
     likeBtn: { padding: '6px 14px', backgroundColor: 'white', color: '#333', border: '1px solid #ddd', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
     likedBtn: { padding: '6px 14px', backgroundColor: '#fff0f1', color: '#e63946', border: '1px solid #e63946', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
     commentBtn: { padding: '6px 14px', backgroundColor: '#f0f4f8', color: '#457b9d', border: '1px solid #d0dde8', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' },
@@ -214,8 +304,39 @@ const styles = {
     noComments: { color: '#aaa', textAlign: 'center', fontSize: '13px' },
     message: { textAlign: 'center', fontWeight: '500', color: 'green', marginBottom: '12px' },
     center: { textAlign: 'center', marginTop: '60px', fontSize: '16px', color: '#888' },
-    articleImage: {width: '100%', height: '200px', objectFit: 'cover',  borderRadius: '8px', marginBottom: '10px'
+    overlay: {
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+        padding: '20px'
     },
+    modal: {
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        maxWidth: '750px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
+    },
+    modalImage: {
+        width: '100%',
+        height: '300px',
+        objectFit: 'cover',
+        display: 'block',
+        borderRadius: '12px 12px 0 0'
+    },
+    modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '20px 24px 0' },
+    modalTitle: { color: '#333', margin: 0, fontSize: '20px', flex: 1, lineHeight: '1.4' },
+    closeBtn: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888', marginLeft: '10px', flexShrink: 0 },
+    modalDescription: { color: '#666', fontSize: '14px', margin: '10px 24px', lineHeight: '1.6' },
+    modalStats: { display: 'flex', gap: '16px', color: '#888', fontSize: '13px', padding: '0 24px 12px', borderBottom: '1px solid #eee' },
+    modalContent: { color: '#333', fontSize: '15px', lineHeight: '1.8', padding: '16px 24px', whiteSpace: 'pre-wrap' },
+    commentsTitle: { margin: '0 0 12px', color: '#333' }
 };
 
 export default ArticlesPage;

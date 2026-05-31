@@ -68,8 +68,7 @@ public class ArticleCustomRepository {
 
         selectQueryBuilder.append(builder);
         countQueryBuilder.append(builder);
-        selectQueryBuilder.append(" ORDER BY a.publishedDate DESC ");
-
+        selectQueryBuilder.append(" ORDER BY COALESCE(a.publishedDate, a.createdDate) DESC ");
         // select query
         Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());
         selectQuery.setFirstResult((page) * size); // 50
